@@ -1,10 +1,17 @@
 package main
 
-import tea "charm.land/bubbletea/v2"
+import (
+	"log"
+
+	tea "charm.land/bubbletea/v2"
+	"github.com/ArcaneCrowA/go-todo/internal/ui"
+)
 
 func main() {
-	p := tea.NewProgram()
+	model := ui.TodoList{}
+
+	p := tea.NewProgram(model)
 	if _, err := p.Run(); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
