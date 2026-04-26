@@ -6,7 +6,7 @@ import (
 )
 
 type TodoList struct {
-	list []task.Task
+	list []task.Item
 }
 
 func (t TodoList) Init() tea.Cmd {
