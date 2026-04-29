@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+silent: true
+
+tasks:
+  default:
+    desc: Default (test)
+    cmds:
+      - task: test
+
+  run:
+    desc: Print a greeting message
+    cmds:
+      - go run ./cmd/todo
+
+  test:
+    desc: Test recursively
+    cmds:
+      - go test ./...
+
+  test-cover:
+    desc: Test with coverage report
+    cmds:
+      - go test ./... -coverprofile=coverage.out
+      - go tool cover -html=coverage.out
