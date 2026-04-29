@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 
 	"github.com/ArcaneCrowA/go-todo/internal/task"
@@ -11,23 +12,34 @@ type JSONStore struct {
 	path string
 }
 
-func NewJSONStore(path string) JSONStore {
-	return JSONStore{path: path}
+func NewJSONStore(path string) *JSONStore {
+	return &JSONStore{path: path}
 }
 
-func (j JSONStore) Save(item task.Item) error {
-	file, err := os.OpenFile(j.path, os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
+func (s *JSONStore) Save(item task.Item) error {
+	var items []task.Item
+	var id int
 
-	var tasks []task.Item
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&tasks)
-	if err != nil {
+	data, err := os.ReadFile(s.path)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
 
-	return nil
+	if len(data) > 0 {
+		err = json.Unmarshal(data, &items)
+		if err != nil {
+			return err
+		}
+		id = items[len(items)-1].ID
+	}
+
+	item.ID = id
+	items = append(items, item)
+
+	data, err = json.Marshal(items)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(s.path, data, 0664)
 }

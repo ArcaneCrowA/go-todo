@@ -1,4 +1,4 @@
-package storage
+package ui
 
 import "github.com/ArcaneCrowA/go-todo/internal/task"
 
