@@ -6,9 +6,9 @@ silent: true
 
 tasks:
   default:
-    desc: Default (test)
+    desc: Default (run)
     cmds:
-      - task: test
+      - task: run
 
   run:
     desc: Print a greeting message
