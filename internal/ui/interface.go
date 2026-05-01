@@ -3,7 +3,7 @@ package ui
 import "github.com/ArcaneCrowA/go-todo/internal/task"
 
 type Storage interface {
-	Save(task task.Item) error
-	Delete(task task.Item) error
+	Save(item task.Item) error
+	Delete(item task.Item) error
 	Load() ([]task.Item, error)
 }
