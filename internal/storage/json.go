@@ -22,7 +22,10 @@ func (s *JSONStore) Save(item task.Item) error {
 		return err
 	}
 
-	item.ID = items[len(items)-1].ID
+	if len(items) > 0 {
+		item.ID = items[len(items)-1].ID
+	}
+
 	items = append(items, item)
 
 	return s.saveItems(items)
