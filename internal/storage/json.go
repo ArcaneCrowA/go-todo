@@ -23,7 +23,7 @@ func (s *JSONStore) Save(item task.Item) error {
 	}
 
 	if len(items) > 0 {
-		item.ID = items[len(items)-1].ID
+		item.ID = items[len(items)-1].ID + 1
 	}
 
 	items = append(items, item)
@@ -37,7 +37,7 @@ func (s *JSONStore) Delete(item task.Item) error {
 		return err
 	}
 
-	newItems := make([]task.Item, 0, len(items)-1)
+	newItems := make([]task.Item, 0, len(items))
 	for _, it := range items {
 		if item.ID == it.ID {
 			continue
