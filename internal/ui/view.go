@@ -13,7 +13,11 @@ func (t TodoList) View() tea.View {
 	b.WriteString("to do list\n\n")
 
 	for i, item := range t.list {
-		fmt.Fprintf(&b, "%d. %s\n", i+1, item.Name)
+		cursor := " " // no cursor
+		if t.cursor == i {
+			cursor = ">" // cursor!
+		}
+		fmt.Fprintf(&b, "%s %s\n", cursor, item.Name)
 	}
 
 	return tea.NewView(b.String())

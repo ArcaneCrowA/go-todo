@@ -6,4 +6,5 @@ type Storage interface {
 	Save(item task.Item) error
 	Delete(item task.Item) error
 	Load() ([]task.Item, error)
+	Edit(item task.Item) error
 }

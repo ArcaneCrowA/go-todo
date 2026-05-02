@@ -14,6 +14,14 @@ func (t TodoList) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return t, tea.Quit
+		case "up", "k":
+			if t.cursor > 0 {
+				t.cursor--
+			}
+		case "down", "j":
+			if t.cursor < len(t.list)-1 {
+				t.cursor++
+			}
 		}
 	}
 	return t, nil

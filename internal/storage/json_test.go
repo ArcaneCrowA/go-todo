@@ -196,6 +196,133 @@ func TestJSONSavePersistsToFile(t *testing.T) {
 	assert.Contains(t, s, "desc")
 }
 
+func TestJSONEdit(t *testing.T) {
+	t.Parallel()
+
+	now := time.Now().Truncate(time.Minute)
+
+	tests := []struct {
+		name         string
+		setup        func(t *testing.T) string
+		itemsToSave  []task.Item
+		editToApply  task.Item
+		wantErr      bool
+		wantName     string
+		wantDesc     string
+		wantStatusFn func(t *testing.T, got task.Item)
+	}{
+		{
+			name: "edit existing item updates fields",
+			setup: func(t *testing.T) string {
+				return t.TempDir() + "/storage.json"
+			},
+			itemsToSave: []task.Item{
+				{Name: "old name", Description: "old desc", Status: task.ToDo, Created: now, Updated: now},
+			},
+			editToApply: task.Item{
+				ID: 0, Name: "new name", Description: "new desc", Status: task.Done, Created: now, Updated: now,
+			},
+			wantErr:  false,
+			wantName: "new name",
+			wantDesc: "new desc",
+			wantStatusFn: func(t *testing.T, got task.Item) {
+				assert.Equal(t, task.Done, got.Status)
+			},
+		},
+		{
+			name: "edit non-existing ID returns no error and does nothing",
+			setup: func(t *testing.T) string {
+				return t.TempDir() + "/storage.json"
+			},
+			itemsToSave: []task.Item{
+				{Name: "keep", Description: "keep me", Status: task.ToDo, Created: now, Updated: now},
+			},
+			editToApply: task.Item{
+				ID: 99, Name: "ghost", Description: "ghost desc", Status: task.InProgress, Created: now, Updated: now,
+			},
+			wantErr:  false,
+			wantName: "keep",
+			wantDesc: "keep me",
+			wantStatusFn: func(t *testing.T, got task.Item) {
+				assert.Equal(t, task.ToDo, got.Status)
+			},
+		},
+		{
+			name: "edit one of many items only changes the target",
+			setup: func(t *testing.T) string {
+				path := t.TempDir() + "/storage.json"
+				st := storage.NewJSONStore(path)
+				for _, item := range []task.Item{
+					{Name: "alpha", Description: "a", Status: task.ToDo, Created: now, Updated: now},
+					{Name: "beta", Description: "b", Status: task.ToDo, Created: now, Updated: now},
+					{Name: "gamma", Description: "c", Status: task.ToDo, Created: now, Updated: now},
+				} {
+					require.NoError(t, st.Save(item))
+				}
+				return path
+			},
+			editToApply: task.Item{
+				ID: 1, Name: "BETA UPDATED", Description: "updated b", Status: task.InProgress, Created: now, Updated: now,
+			},
+			wantErr:  false,
+			wantName: "BETA UPDATED",
+			wantDesc: "updated b",
+			wantStatusFn: func(t *testing.T, got task.Item) {
+				assert.Equal(t, task.InProgress, got.Status)
+			},
+		},
+		{
+			name: "edit on empty store returns no error",
+			setup: func(t *testing.T) string {
+				return t.TempDir() + "/storage.json"
+			},
+			itemsToSave: []task.Item{},
+			editToApply: task.Item{
+				ID: 0, Name: "nothing", Description: "nothing", Status: task.ToDo, Created: now, Updated: now,
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			path := tt.setup(t)
+			st := storage.NewJSONStore(path)
+
+			for _, item := range tt.itemsToSave {
+				require.NoError(t, st.Save(item))
+			}
+
+			err := st.Edit(tt.editToApply)
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+
+			loaded, err := st.Load()
+			require.NoError(t, err)
+
+			var found bool
+			for _, it := range loaded {
+				if it.ID == tt.editToApply.ID {
+					found = true
+					assert.Equal(t, tt.wantName, it.Name)
+					assert.Equal(t, tt.wantDesc, it.Description)
+					if tt.wantStatusFn != nil {
+						tt.wantStatusFn(t, it)
+					}
+					break
+				}
+			}
+
+			if !found && tt.editToApply.ID >= 0 && tt.editToApply.ID < len(loaded) {
+				t.Errorf("edited item with ID %d not found in %d loaded items", tt.editToApply.ID, len(loaded))
+			}
+		})
+	}
+}
+
 func TestJSONDelete(t *testing.T) {
 	t.Parallel()
 

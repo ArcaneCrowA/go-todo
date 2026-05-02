@@ -70,6 +70,22 @@ func (s *JSONStore) Load() ([]task.Item, error) {
 	return items, nil
 }
 
+func (s *JSONStore) Edit(item task.Item) error {
+	items, err := s.Load()
+	if err != nil {
+		return err
+	}
+
+	for i, it := range items {
+		if item.ID == it.ID {
+			items[i] = item
+			return s.saveItems(items)
+		}
+	}
+
+	return nil
+}
+
 func (s *JSONStore) saveItems(items []task.Item) error {
 	data, err := json.Marshal(items)
 	if err != nil {
