@@ -46,10 +46,15 @@ func (m *TodoList) listUpdate(msg tea.Msg, cmd *tea.Cmd) {
 func (m *TodoList) editUpdate(msg tea.Msg, cmd *tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
-		if msg.String() == "enter" {
+		switch msg.String() {
+		case "ctrl+c":
+			*cmd = tea.Quit
+			return
+		case "enter":
 			m.textInput.Blur()
 			m.state = listView
+
 		}
+		m.textInput, *cmd = m.textInput.Update(msg)
 	}
-	m.textInput, *cmd = m.textInput.Update(msg)
 }
