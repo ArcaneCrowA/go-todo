@@ -6,6 +6,7 @@ import (
 
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/ArcaneCrowA/go-todo/internal/task"
 )
 
@@ -18,23 +19,57 @@ const (
 )
 
 type TodoList struct {
-	list      []task.Item
-	storage   Storage
-	cursor    int
-	state     sessionState
-	textInput textinput.Model
+	list       []task.Item
+	storage    Storage
+	cursor     int
+	state      sessionState
+	inputs     []textinput.Model
+	focusIndex int
 }
 
+var (
+	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+	cursorStyle         = focusedStyle
+	noStyle             = lipgloss.NewStyle()
+	helpStyle           = blurredStyle
+	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
+)
+
 func New(storage Storage) TodoList {
-	ti := textinput.New()
-	ti.Placeholder = "Edit task..."
-	ti.CharLimit = 100
-	ti.SetWidth(40)
-	return TodoList{
-		storage:   storage,
-		state:     listView,
-		textInput: ti,
+	m := TodoList{
+		storage: storage,
+		state:   listView,
+		inputs:  make([]textinput.Model, 3),
 	}
+
+	var t textinput.Model
+	for i := range m.inputs {
+		t = textinput.New()
+		t.CharLimit = 32
+
+		s := t.Styles()
+		s.Cursor.Color = lipgloss.Color("205")
+		s.Focused.Prompt = focusedStyle
+
+		t.SetStyles(s)
+
+		switch i {
+		case 0:
+			t.Placeholder = "Title"
+			t.Focus()
+		case 1:
+			t.Placeholder = "Description"
+			t.Blur()
+		case 2:
+			t.Placeholder = "Status"
+			t.Blur()
+		}
+
+		m.inputs[i] = t
+	}
+
+	return m
 }
 
 func (m TodoList) Init() tea.Cmd {

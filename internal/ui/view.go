@@ -8,21 +8,23 @@ import (
 )
 
 func (m TodoList) View() tea.View {
+	var b strings.Builder
+
 	switch m.state {
 	case addView:
-
 	case editView:
-		return tea.NewView(fmt.Sprintf(
-			`Enter new Title:
+		var c *tea.Cursor
+		for i := range m.inputs {
+			b.WriteString(m.inputs[i].View())
+			if i < len(m.inputs)-1 {
+				b.WriteRune('\n')
+			}
+		}
+		v := tea.NewView(b.String())
+		v.Cursor = c
+		return v
 
-			%s
-
-			(enter to save)`,
-			m.textInput.View(),
-		))
 	default:
-		b := strings.Builder{}
-
 		b.WriteString("ToDo\n\n")
 
 		for i, item := range m.list {
