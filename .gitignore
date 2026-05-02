@@ -25,4 +25,4 @@ go.work.sum
 *.swo
 *~
 
-items.json
+# items.json
