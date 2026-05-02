@@ -87,7 +87,7 @@ func (s *JSONStore) Edit(item task.Item) error {
 }
 
 func (s *JSONStore) saveItems(items []task.Item) error {
-	data, err := json.Marshal(items)
+	data, err := json.MarshalIndent(items, "", "  ")
 	if err != nil {
 		return err
 	}

@@ -38,14 +38,6 @@ var (
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
 )
 
-var statusNames = map[task.Status]string{
-	task.ToDo:       "ToDo",
-	task.InProgress: "InProgress",
-	task.Done:       "Done",
-}
-
-var statusValues = []task.Status{task.ToDo, task.InProgress, task.Done}
-
 func New(storage Storage) TodoList {
 	m := TodoList{
 		storage: storage,

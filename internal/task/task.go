@@ -2,19 +2,20 @@ package task
 
 import "time"
 
-type Status uint8
-
 const (
-	ToDo Status = iota
-	InProgress
-	Done
+	ToDo       = "to-do"
+	InProgress = "in-progress"
+	Done       = "done"
 )
+
+var Statuses []string = []string{ToDo, InProgress, Done}
+var NumStatuses = len(Statuses)
 
 type Item struct {
 	ID          int       `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
-	Status      Status    `json:"status"`
+	Status      string    `json:"status"`
 	Created     time.Time `json:"created_at"`
 	Updated     time.Time `json:"updated_at"`
 }
