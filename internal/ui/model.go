@@ -27,6 +27,7 @@ type TodoList struct {
 	focusIndex  int
 	status      string
 	statusIndex int
+	isAdding    bool
 }
 
 var (

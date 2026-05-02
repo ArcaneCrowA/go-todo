@@ -3,6 +3,7 @@ package ui
 import (
 	"log/slog"
 	"os"
+	"time"
 
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
@@ -41,9 +42,20 @@ func (m *TodoList) listUpdate(msg tea.Msg, cmd *tea.Cmd) {
 			m.state = editView
 			m.inputs[0].SetValue(m.list[m.cursor].Name)
 			m.inputs[1].SetValue(m.list[m.cursor].Description)
-			m.status = m.list[m.cursor].Status
+			for i, s := range task.Statuses {
+				if s == m.list[m.cursor].Status {
+					m.statusIndex = i
+					break
+				}
+			}
+			m.status = task.Statuses[m.statusIndex]
+			m.isAdding = false
+			*cmd = textinput.Blink
+		case "a":
+			m.state = editView
+			m.status = task.ToDo
 			m.statusIndex = 0
-			m.focusIndex = 0
+			m.isAdding = true
 			*cmd = textinput.Blink
 		}
 		m.list, _ = m.storage.Load()
@@ -51,8 +63,6 @@ func (m *TodoList) listUpdate(msg tea.Msg, cmd *tea.Cmd) {
 }
 
 func (m *TodoList) editUpdate(msg tea.Msg, cmd *tea.Cmd) {
-	item := m.list[m.cursor]
-
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
@@ -93,12 +103,25 @@ func (m *TodoList) editUpdate(msg tea.Msg, cmd *tea.Cmd) {
 			}
 
 		case "enter":
+			var item task.Item
+			if !m.isAdding {
+				item = m.list[m.cursor]
+			}
 			item.Name = m.inputs[0].Value()
 			item.Description = m.inputs[1].Value()
 			item.Status = task.Statuses[m.statusIndex]
-			if err := m.storage.Edit(item); err != nil {
-				slog.Error(err.Error())
-				os.Exit(1)
+			item.Updated = time.Now()
+			if m.isAdding {
+				item.Created = time.Now()
+				if err := m.storage.Save(item); err != nil {
+					slog.Error(err.Error())
+					os.Exit(1)
+				}
+			} else {
+				if err := m.storage.Edit(item); err != nil {
+					slog.Error(err.Error())
+					os.Exit(1)
+				}
 			}
 			for i := range m.inputs {
 				m.inputs[i].Reset()
