@@ -32,6 +32,7 @@ type TodoList struct {
 var (
 	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+	menuStyle           = lipgloss.NewStyle().Foreground(lipgloss.Color("270"))
 	cursorStyle         = focusedStyle
 	noStyle             = lipgloss.NewStyle()
 	helpStyle           = blurredStyle

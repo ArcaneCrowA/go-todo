@@ -57,6 +57,8 @@ func (m *TodoList) listUpdate(msg tea.Msg, cmd *tea.Cmd) {
 			m.statusIndex = 0
 			m.isAdding = true
 			*cmd = textinput.Blink
+		case "d":
+			m.storage.Delete(m.list[m.cursor])
 		}
 		m.list, _ = m.storage.Load()
 	}

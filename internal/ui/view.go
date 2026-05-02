@@ -30,7 +30,7 @@ func (m TodoList) View() tea.View {
 		return v
 
 	default:
-		b.WriteString("ToDo\n\n")
+		b.WriteString(menuStyle.Render("TODO"))
 
 		for i, item := range m.list {
 			style := blurredStyle
@@ -42,7 +42,6 @@ func (m TodoList) View() tea.View {
 		}
 
 		b.WriteString(helpStyle.Render(`
-
 			a : add new task
 			e : edit task
 			d : delete task
