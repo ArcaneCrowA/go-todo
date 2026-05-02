@@ -11,7 +11,6 @@ func (m TodoList) View() tea.View {
 	var b strings.Builder
 
 	switch m.state {
-	case addView:
 	case editView:
 		var c *tea.Cursor
 		for i := range m.inputs {
@@ -20,7 +19,11 @@ func (m TodoList) View() tea.View {
 				b.WriteRune('\n')
 			}
 		}
-		fmt.Fprintf(&b, "\nStatus: %s\n", m.status)
+		style := blurredStyle
+		if m.focusIndex == 2 {
+			style = focusedStyle
+		}
+		fmt.Fprintf(&b, "\n%s %s\n", style.Render("Status:"), m.status)
 
 		v := tea.NewView(b.String())
 		v.Cursor = c
@@ -30,16 +33,21 @@ func (m TodoList) View() tea.View {
 		b.WriteString("ToDo\n\n")
 
 		for i, item := range m.list {
-			cursor := " " // no cursor
+			style := blurredStyle
 			if m.cursor == i {
-				cursor = ">" // cursor!
+				style = focusedStyle
 			}
-			fmt.Fprintf(&b, "%s %s\n", cursor, item.Name)
+
+			fmt.Fprintf(&b, "%s %s\n", style.Render(fmt.Sprintf("%2d: %s", i, item.Name)), item.Status)
 		}
 
-		b.WriteString("\nctrl+c or q to exit")
+		b.WriteString(helpStyle.Render(`
+
+			a : add new task
+			e : edit task
+			d : delete task
+			q : exit`))
 
 		return tea.NewView(b.String())
 	}
-	return tea.View{}
 }

@@ -14,7 +14,6 @@ type sessionState int
 
 const (
 	listView sessionState = iota
-	addView
 	editView
 )
 
