@@ -1,6 +1,9 @@
 package ui
 
 import (
+	"log/slog"
+	"os"
+
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 	"github.com/ArcaneCrowA/go-todo/internal/task"
@@ -36,6 +39,7 @@ func (m *TodoList) listUpdate(msg tea.Msg, cmd *tea.Cmd) {
 			}
 		case "e":
 			m.state = editView
+			m.textInput.SetValue(m.list[m.cursor].Name)
 			m.textInput.Focus()
 			*cmd = textinput.Blink
 		}
@@ -51,10 +55,17 @@ func (m *TodoList) editUpdate(msg tea.Msg, cmd *tea.Cmd) {
 			*cmd = tea.Quit
 			return
 		case "enter":
+			item := m.list[m.cursor]
+			item.Name = m.textInput.Value()
+			if err := m.storage.Edit(item); err != nil {
+				slog.Error(err.Error())
+				os.Exit(1)
+			}
 			m.textInput.Blur()
 			m.state = listView
 
 		}
+		m.list, _ = m.storage.Load()
 		m.textInput, *cmd = m.textInput.Update(msg)
 	}
 }

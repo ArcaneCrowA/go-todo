@@ -13,7 +13,11 @@ func (m TodoList) View() tea.View {
 
 	case editView:
 		return tea.NewView(fmt.Sprintf(
-			"Enter new value:\n\n%s\n\n(press enter to save)",
+			`Enter new Title:
+
+			%s
+
+			(enter to save)`,
 			m.textInput.View(),
 		))
 	default:
