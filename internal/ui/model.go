@@ -19,12 +19,14 @@ const (
 )
 
 type TodoList struct {
-	list       []task.Item
-	storage    Storage
-	cursor     int
-	state      sessionState
-	inputs     []textinput.Model
-	focusIndex int
+	list        []task.Item
+	storage     Storage
+	cursor      int
+	state       sessionState
+	inputs      []textinput.Model
+	focusIndex  int
+	status      string
+	statusIndex int
 }
 
 var (
@@ -36,11 +38,19 @@ var (
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
 )
 
+var statusNames = map[task.Status]string{
+	task.ToDo:       "ToDo",
+	task.InProgress: "InProgress",
+	task.Done:       "Done",
+}
+
+var statusValues = []task.Status{task.ToDo, task.InProgress, task.Done}
+
 func New(storage Storage) TodoList {
 	m := TodoList{
 		storage: storage,
 		state:   listView,
-		inputs:  make([]textinput.Model, 3),
+		inputs:  make([]textinput.Model, 2),
 	}
 
 	var t textinput.Model
@@ -61,11 +71,7 @@ func New(storage Storage) TodoList {
 		case 1:
 			t.Placeholder = "Description"
 			t.Blur()
-		case 2:
-			t.Placeholder = "Status"
-			t.Blur()
 		}
-
 		m.inputs[i] = t
 	}
 

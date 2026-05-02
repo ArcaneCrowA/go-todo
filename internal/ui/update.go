@@ -41,6 +41,8 @@ func (m *TodoList) listUpdate(msg tea.Msg, cmd *tea.Cmd) {
 			m.state = editView
 			m.inputs[0].SetValue(m.list[m.cursor].Name)
 			m.inputs[1].SetValue(m.list[m.cursor].Description)
+			m.statusIndex = int(m.list[m.cursor].Status)
+			m.status = statusNames[statusValues[m.statusIndex]]
 			m.focusIndex = 0
 			*cmd = textinput.Blink
 		}
@@ -50,12 +52,33 @@ func (m *TodoList) listUpdate(msg tea.Msg, cmd *tea.Cmd) {
 
 func (m *TodoList) editUpdate(msg tea.Msg, cmd *tea.Cmd) {
 	item := m.list[m.cursor]
+
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c":
 			*cmd = tea.Quit
 			return
+		case "h", "left":
+			if m.focusIndex == 2 {
+				m.statusIndex--
+
+				if m.statusIndex < 0 {
+					m.statusIndex = len(statusValues) - 1
+				}
+
+				m.status = statusNames[statusValues[m.statusIndex]]
+			}
+		case "l", "right":
+			if m.focusIndex == 2 {
+				m.statusIndex++
+
+				if int(m.statusIndex) > len(statusValues)-1 {
+					m.statusIndex = 0
+				}
+
+				m.status = statusNames[statusValues[m.statusIndex]]
+			}
 		case "tab", "shift+tab":
 			if msg.String() == "tab" {
 				m.focusIndex++
@@ -66,7 +89,7 @@ func (m *TodoList) editUpdate(msg tea.Msg, cmd *tea.Cmd) {
 			if m.focusIndex < 0 {
 				m.focusIndex = len(m.inputs) - 1
 			}
-			if m.focusIndex > 2 {
+			if m.focusIndex > len(m.inputs) {
 				m.focusIndex = 0
 			}
 
@@ -82,6 +105,7 @@ func (m *TodoList) editUpdate(msg tea.Msg, cmd *tea.Cmd) {
 		case "enter":
 			item.Name = m.inputs[0].Value()
 			item.Description = m.inputs[1].Value()
+			item.Status = statusValues[m.statusIndex]
 			if err := m.storage.Edit(item); err != nil {
 				slog.Error(err.Error())
 				os.Exit(1)

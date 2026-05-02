@@ -20,6 +20,8 @@ func (m TodoList) View() tea.View {
 				b.WriteRune('\n')
 			}
 		}
+		fmt.Fprintf(&b, "\nStatus: %s\n", m.status)
+
 		v := tea.NewView(b.String())
 		v.Cursor = c
 		return v
