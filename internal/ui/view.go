@@ -30,7 +30,7 @@ func (m TodoList) View() tea.View {
 		return v
 
 	default:
-		b.WriteString(menuStyle.Render("TODO"))
+		b.WriteString(menuStyle.Render("\t\t\tTODO\n\n"))
 
 		for i, item := range m.list {
 			style := blurredStyle
