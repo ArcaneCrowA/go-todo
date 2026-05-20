@@ -10,6 +10,9 @@ import (
 
 func main() {
 	jsonStorage := storage.NewJSONStore("items.json")
+	_, cleanup := storage.NewSqliteStore("items.db")
+	defer cleanup()
+
 	model := ui.New(jsonStorage)
 
 	p := tea.NewProgram(model)
