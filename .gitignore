@@ -25,4 +25,6 @@ go.work.sum
 *.swo
 *~
 
+# Task storage files
 items.json
+items.db

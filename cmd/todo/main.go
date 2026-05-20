@@ -9,11 +9,11 @@ import (
 )
 
 func main() {
-	jsonStorage := storage.NewJSONStore("items.json")
-	_, cleanup := storage.NewSqliteStore("items.db")
+	// store := storage.NewJSONStore("items.json")
+	store, cleanup := storage.NewSqliteStore("items.db")
 	defer cleanup()
 
-	model := ui.New(jsonStorage)
+	model := ui.New(store)
 
 	p := tea.NewProgram(model)
 	if _, err := p.Run(); err != nil {
